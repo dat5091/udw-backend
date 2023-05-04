@@ -1,17 +1,13 @@
-const ContactService = require("../services/contact.service");
+const NhanVienService = require("../services/nhanVien.sevice")
 const MongoDB = require("../utils/mongodb.util");
 const ApiError = require("../api-error");
 
 
 // Create and Save a new Contact
 exports.create = async (req, res, next) => {
-    if (!req.body?.name) {
-        return next(new ApiError(400, "Name can not be empty"));
-    }
-
     try {
-        const contactService = new ContactService(MongoDB.client);
-        const document = await contactService.create(req.body);
+        const nhanvienService = new NhanVienService(MongoDB.client);
+        const document = await nhanvienService.create(req.body);
         return res.send(document);
     } catch (error) {
         return next(
@@ -24,12 +20,13 @@ exports.findAll = async (req, res, next) => {
     let documents = [];
 
     try {
-        const contactService = new ContactService(MongoDB.client);
-        const { name } = req.query;
-        if (name) {
-            documents = await contactService.findByName(name);
+        const nhanvienService = new NhanVienService(MongoDB.client);
+        const { hoten } = req.query;
+        
+        if (hoten) {
+            documents = await nhanvienService.findByHoTen(hoten);
         } else {
-            documents = await contactService.find({});
+            documents = await nhanvienService.find({});
         }
     } catch (error) {
         return next(
@@ -42,8 +39,8 @@ exports.findAll = async (req, res, next) => {
 
 exports.findOne = async (req, res, next) => {
     try {
-        const contactService = new ContactService(MongoDB.client);
-        const document = await contactService.findByID(req.params.id);
+        const nhanvienService = new NhanVienService(MongoDB.client);
+        const document = await nhanvienService.findByID(req.params.id);
         if (!document) {
             return next(new ApiError(404, "Contact not found"));
         }
@@ -62,10 +59,11 @@ exports.update = async (req, res, next) => {
     if (Object.keys(req.body).length === 0) {
         return next(new ApiError(400, "Data to update can not be empty"));
     }
-
+    console.log(req.body);
+    console.log(req.params.id);
     try {
-        const contactService = new ContactService(MongoDB.client);
-        const document = await contactService.update(req.params.id, req.body);
+        const nhanvienService = new NhanVienService(MongoDB.client);
+        const document = await nhanvienService.update(req.params.id, req.body);
         if (!document) {
             return next(new ApiError(404, "Contact not found"));
         }
@@ -79,8 +77,8 @@ exports.update = async (req, res, next) => {
 
 exports.delete = async (req, res, next) => {
     try {
-        const contactService = new ContactService(MongoDB.client);
-        const document = await contactService.delete(req.params.id);
+        const nhanvienService = new NhanVienService(MongoDB.client);
+        const document = await nhanvienService.delete(req.params.id);
         if (!document) {
             return next(new ApiError(404, "Contact not found"));
         }
@@ -95,29 +93,14 @@ exports.delete = async (req, res, next) => {
 
 exports.deleteAll = async (_req, res, next) => {
     try {
-        const contactService = new ContactService(MongoDB.client);
-        const deletedCount = await contactService.deleteAll();
+        const nhanvienService = new NhanVienService(MongoDB.client);
+        const deletedCount = await nhanvienService.deleteAll();
         return res.send({
             message: `${deletedCount} contacts were deleted successfully`,
         });
     } catch (error) {
         return next(
             new ApiError(500, "An error occurred while removing all contacts")
-        );
-    }
-};
-
-exports.findAllFavorite = async (_req, res, next) => {
-    try {
-        const contactService = new ContactService(MongoDB.client);
-        const documents = await contactService.findFavorite();
-        return res.send(documents);
-    } catch (error) {
-        return next(
-            new ApiError(
-                500,
-                "An error occured while retrieving favorite contacts"
-            )
         );
     }
 };
